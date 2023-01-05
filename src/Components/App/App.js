@@ -4,6 +4,8 @@ import { SearchBar } from "../SearchBar/SearchBar";
 import { SearchResults } from "../SearchResults/SearchResults";
 import { Playlist } from "../Playlist/Playlist";
 
+import Spotify from "../../util/Spotify";
+
 export class App extends React.Component {
   constructor(props) {
     super(props);
@@ -100,7 +102,12 @@ export class App extends React.Component {
 
   search(term){
    
-    console.log(term);
+    // After changing the input in SearchBar Component(something typying in) that term will be sent all the way to main app. search() then connect to spitify API with the term. And this.state.searchResults will now be set to the value result from our Spotify searches promise 
+
+
+    Spotify.search(term).then(searchResults => {
+      this.setState({ searchResults: searchResults})
+    })
     
   }
 
