@@ -12,7 +12,7 @@ export class App extends React.Component {
       searchResults: [
         { name: "name1", artist: "artist1", album: "album1", id: 1 },
         { name: "name2", artist: "artist2", album: "album2", id: 2 },
-        { name: "name3", artist: "artist3", album: "album3", id: 3 },
+        { name: "name3", artist: "artist3", album: "album3", id: 3},
       ],
 
       playlistName: "My Playlist",
@@ -23,12 +23,16 @@ export class App extends React.Component {
         { name: "playlistName3", artist: "playlistArtist3", album: "playlistAlbum3", id: 30 },
       ],
 
+      trackURIs: []
+
 
     };
 
     this.addTrack = this.addTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
     this.updatePlaylistName = this.updatePlaylistName.bind(this);
+    this.savePlaylist = this.savePlaylist.bind(this);
+    this.search = this.search.bind(this);
   }
 
   // addTrack() method takes a track object(with properties of name, artist, album, id), then it will use the ID property to check if the track is in the playlist track state and if the ID is new we will add the song(push) at the end of playlist and then we will set a new state of plaList
@@ -78,7 +82,27 @@ export class App extends React.Component {
     this.setState({ playlistName : name});
   }
 
+  // After clicking Save to Spotify button in Playlist componenet savePlaylist through props onSave is called. Method then goes through all the track that are currently added in Playlist and takes their URIs which are stored in trackURIs array
+  
+  savePlaylist(){
 
+    alert("This method works");
+
+    const tracks = this.state.playlistTracks;
+    
+    // Note that I am using here one liner shortcut(therfore I do not neet return keyword) saying: Go through all tracks and return track.uri. I could also use: const trackURIs = tracks.map((track) => {return track.uri})
+
+    const trackURIs = tracks.map((track) => track.uri)
+
+    this.setState({trackURIs: trackURIs });
+  }
+
+
+  search(term){
+   
+    console.log(term);
+    
+  }
 
 
   render() {
@@ -88,7 +112,9 @@ export class App extends React.Component {
           Ja<span className="highlight">mmm</span>ing
         </h1>
         <div className="App">
-          <SearchBar />
+          <SearchBar 
+                onSearch={this.search}
+          />
 
           <div className="App-playlist">
             <SearchResults 
@@ -101,6 +127,7 @@ export class App extends React.Component {
                 tracks={this.state.playlistTracks}
                 onRemove={this.removeTrack}
                 onNameChange={this.updatePlaylistName}
+                onSave={this.savePlaylist}
             />
           </div>
         </div>
