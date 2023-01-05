@@ -1,6 +1,6 @@
 // This serves as a MODULE not as a COMPONENT! and that is why it needs to be exported as a whole => export default Spotify;
 
-const clientId = '*********************';        
+const clientId = '****************************';        
 const redirectURI = 'http://localhost:3000/';
 
 
@@ -18,6 +18,10 @@ const Spotify = {
 
         //  /access_token=([^&]*)/ => is a regular expression(REGEX) to access the access token => It will let us to capture all of the characters assigned to access token
 
+        // Example URL from Spotify https://example.com/callback#access_token=NwAExz...BV3O2Tk&token_type=Bearer&expires_in=3600&state=123
+
+        // So this will basically goes through the string and if in the URL strings are both  access_token and expires_in it will carry
+        
         const accessTokenMatch =  window.location.href.match(/access_token=([^&]*)/);
 
         
@@ -43,10 +47,8 @@ const Spotify = {
         else {
             const accessUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&scope=playlist-modify-public&redirect_uri=${redirectURI}`;
 
-            window.location = accessUrl;
+             window.location = accessUrl;
         }
-
-
 
         
     },
@@ -58,13 +60,15 @@ const Spotify = {
         
         // start the promise chain by returning a GET request (using fetch()) to the following Spotify endpoint: https://api.spotify.com/v1/search?type=track&q=TERM with authorisation header(as that is what Spotify requires)
         
-        // the way fetch API works is that we pass URL as the first property and that it has second property which is optional which si all the different options I want to pass into it. For Example If I want to make POST request instead of GET request
+        // the way fetch API works is that we pass URL as the first property and that it has second argument which is optional which si all the different options I want to pass into it. For Example If I want to make POST request instead of GET request
 
         // also Fetch is promise based and I can use ASYNC and .then and .catch 
+
+        // note the authorization header(second argument of fetch)
         
         return fetch(`https://api.spotify.com/v1/search?type=track&q=${term}`, 
         {   headers: {
-            Authorization: `Bearer ${accessToken}`
+                Authorization: `Bearer ${accessToken}`
             }
         }).then(response => {                   // converting the response to JSON when 
             return response.json();             // our promise is fulfilled
@@ -78,12 +82,12 @@ const Spotify = {
                 
                 id: track.id,
                 name: track.name,
-                artist: track.artist[0].name,
+                artists: track.artists[0].name,
                 album: track.album.name,
                 uri: track.uri
             }));
         });
-    }
+    },
 
     // JSON - JavaScript Object Notation
 
@@ -92,6 +96,74 @@ const Spotify = {
     // jsonResponse.tracks.items.map() => When I am looking through my array 
 
 
+   
+    // Create a method in Spotify.js that accepts two arguments. The first argument is the name of the playlist. The second is an array of track URIs. Inside the function, check if there are values saved to the method’s two arguments. If not, return.
+    
+    savePlaylist(name, trackUris){
+        if (!name || !trackUris.length){
+            return;
+        }
+
+        // Create three default variables: An access token variable, set to the current user’s access token, A headers variable, set to an object with an Authorization parameter containing the user’s access token in the implicit grant flow request format, An empty variable for the user’s ID
+        
+        const accessToken = Spotify.getAccessToken();
+        const headers = { Authorization: `Bearer ${accessToken}`};
+        let userId;
+
+        // Make a request that returns the user’s Spotify username. Convert the response to JSON and save the response id parameter to the user’s ID variable.
+
+        return fetch('https://api.spotify.com/v1/me', { headers: headers }
+        ).then(response => response.json()
+        ).then(jsonResponse => { 
+
+            userId = jsonResponse.id;
+
+            // Use the returned user ID to make a POST request that creates a new playlist in the user’s account and returns a playlist ID
+
+            // Note that specific Spotify API`s are found on https://developer.spotify.com/documentation/web-api/reference/#/ 
+            
+            // The base URI for all Web API requests is https://api.spotify.com/v1
+            // Get User's Playlists is https://api.spotify.com/v1/me/users/{user_id}/playlists
+
+            //Use the Spotify playlist endpoints to find a request that creates a new playlist.
+
+            // Set the playlist name to the value passed into the method.
+
+                        
+            return fetch(`https://api.spotify.com/v1/me/users/${userId}/playlists`,
+                {
+                    
+                    headers: headers,
+                    method: 'POST',
+                    body: JSON.stringify({ name: name})
+                
+                }).then(response => response.json()         // -> ** 
+                ).then(jsonResponse => {
+                    const playlistId = jsonResponse.id;
+
+                    // Use the returned user ID to make a POST request that creates a new playlist in the user’s account and returns a playlist ID.
+
+                    // Request that adds tracks to a playlist : https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks that can be found on SPITIFY endpoints -> See Above
+                    
+                    // Set the URIs parameter to an array of track URIs passed into the method.
+
+                    return fetch(`https://api.spotify.com/v1/users/${userId}/playlists/${playlistId}/tracks`,
+                    {
+                        headers: headers, 
+                        method: 'POST',
+                        body: JSON.stringify({ uris: trackUris})
+                         
+                    })
+                })
+        })
+
+        // -> ** => // Convert the response to JSON and save the response id parameter to a variable called playlistID.
+
+        // We have made a fetch to the endpoint of https://api.spotify.com/v1/me/users/${userId}/playlists where we passed in a user ID where we also passed in an object with properties headers set to headers, method set to POST and body set to the name that user has created their playlist
+
+        // we then converted the response to JSON and then from that JSON response we created a variable called playlistID that was set to jsonResponse.id
+
+    }
 
 }; 
 

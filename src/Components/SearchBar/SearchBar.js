@@ -25,6 +25,8 @@ export class SearchBar extends React.Component {
   
   // Sets the state of the search bar’s term to the event target’s value.(there needs to be initial state in constructor first)
   // States can be set within any componenet, not just Main(app.js)
+
+  // handleTermChange is going to be passed an event, so we are going to have an access to whatever is in that input field and specificly we are going to get the value and we are going to set the state of the term to whatever that value is 
   handleTermChange(event){
 
     this.setState({ term: event.target.value});
