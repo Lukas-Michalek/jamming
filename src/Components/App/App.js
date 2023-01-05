@@ -28,6 +28,7 @@ export class App extends React.Component {
 
     this.addTrack = this.addTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
+    this.updatePlaylistName = this.updatePlaylistName.bind(this);
   }
 
   // addTrack() method takes a track object(with properties of name, artist, album, id), then it will use the ID property to check if the track is in the playlist track state and if the ID is new we will add the song(push) at the end of playlist and then we will set a new state of plaList
@@ -71,6 +72,13 @@ export class App extends React.Component {
   }
 
 
+  // Method for updating Playlist name according to User`s input
+  updatePlaylistName(name){
+  
+    this.setState({ playlistName : name});
+  }
+
+
 
 
   render() {
@@ -92,6 +100,7 @@ export class App extends React.Component {
                 playlistName={this.state.playlistName} 
                 tracks={this.state.playlistTracks}
                 onRemove={this.removeTrack}
+                onNameChange={this.updatePlaylistName}
             />
           </div>
         </div>
